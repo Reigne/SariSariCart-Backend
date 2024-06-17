@@ -1,9 +1,10 @@
 const CategoryModel = require("../models/category");
-const cloudinary = require("cloudinary");
+const cloudinary = require("cloudinary").v2;
 const ErrorHandler = require("../utils/errorHandler");
 
 const createCategory = async (req, res, next) => {
   try {
+    console.log(req.body, "create body");
     const { name } = req.body;
     const existingCategory = await CategoryModel.findOne({
       name: req.body.name,
@@ -14,7 +15,7 @@ const createCategory = async (req, res, next) => {
     }
 
     console.log(req.body.image);
-    
+
     let uploadImage = {};
 
     if (req.body.image) {
@@ -23,7 +24,7 @@ const createCategory = async (req, res, next) => {
         folder: "category",
       };
 
-      const result = await cloudinary.v2.uploader.upload(
+      const result = await cloudinary.uploader.upload(
         req.body.image,
         cloudinaryFolderOption
       );
@@ -94,6 +95,8 @@ const singleCategory = async (req, res, next) => {
 
 const updateCategory = async (req, res, next) => {
   try {
+    console.log(req.body, "what a body");
+
     const findCategory = await CategoryModel.findById(req.params.id);
 
     if (!findCategory) {
@@ -109,7 +112,7 @@ const updateCategory = async (req, res, next) => {
         folder: "category",
       };
 
-      const result = await cloudinary.v2.uploader.upload(
+      const result = await cloudinary.uploader.upload(
         req.body.image,
         cloudinaryFolderOption
       );
@@ -119,7 +122,7 @@ const updateCategory = async (req, res, next) => {
         url: result.secure_url,
       };
     } else {
-      image = findCategory.images;
+      image = findCategory.image;
     }
 
     const category = await CategoryModel.findByIdAndUpdate(
