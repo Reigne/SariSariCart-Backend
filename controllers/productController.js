@@ -4,15 +4,20 @@ const ErrorHandler = require("../utils/errorHandler");
 
 const createProduct = async (req, res, next) => {
   try {
-    const { name, price, description, stock, category, images } =
-      req.body;
+    const { name, price, description, stock, category } = req.body;
+    let images = req.body.images;
 
-    console.log(req.body);
+    // Ensure images is an array
+    if (images && !Array.isArray(images)) {
+      images = [images];
+    }
 
     let uploadImages = [];
 
     if (images && images.length > 0) {
       for (const image of images) {
+        console.log(image, "image for");
+
         const cloudinaryFolderOption = { folder: "product" };
 
         const result = await cloudinary.v2.uploader.upload(
@@ -67,6 +72,7 @@ const singleProduct = async (req, res, next) => {
     const product = await ProductModel.findById(req.params.id).populate([
       "category",
     ]);
+    console.log(product, "product");
 
     if (!product) {
       return next(
@@ -95,9 +101,14 @@ const updateProduct = async (req, res, next) => {
       );
     }
 
-    const { name, price, description, stock, category, images } =
-      req.body;
+    const { name, price, description, stock, category } = req.body;
+    let { images } = req.body;
 
+    // Ensure images is an array
+    if (images && !Array.isArray(images)) {
+      images = [images];
+    }
+    
     let uploadImages = [];
 
     if (images && images.length > 0) {
@@ -131,6 +142,8 @@ const updateProduct = async (req, res, next) => {
       { new: true }
     );
 
+    console.log("updated Product", updatedProduct);
+
     res.status(200).json({
       success: true,
       product: updatedProduct,
@@ -142,6 +155,7 @@ const updateProduct = async (req, res, next) => {
     );
   }
 };
+
 
 const deleteProduct = async (req, res, next) => {
   try {
