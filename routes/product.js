@@ -9,13 +9,13 @@ const {
   deleteProduct,
 } = require("../controllers/productController");
 
-// const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
+const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
 router.post(
   "/product/create",
   upload.array("images"),
-  createProduct
-  //   isAuthenticatedUser
+  createProduct,
+  isAuthenticatedUser
 );
 
 router.route("/products").get(allProducts);

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../utils/multer");
 
-// const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
+const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 const {
   register,
   login,
@@ -13,6 +13,6 @@ const {
 router.post("/register", upload.single("avatar"), register);
 router.post("/login", login);
 router.get("/logout", logout);
-// router.get("/profile", isAuthenticatedUser, profile);
+router.get("/profile", isAuthenticatedUser, profile);
 
 module.exports = router;
