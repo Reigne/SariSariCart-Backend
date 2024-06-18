@@ -5,6 +5,7 @@ const app = express();
 
 const categories = require("./routes/category");
 const products = require("./routes/product");
+const users = require("./routes/user");
 
 var cors = require("cors");
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
 app.use("/api/v1", categories);
 app.use("/api/v1", products);
+app.use("/api/v1", users);
 
 app.use(errorMiddleware);
 
