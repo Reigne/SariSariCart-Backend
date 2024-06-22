@@ -8,11 +8,17 @@ const {
   login,
   profile,
   logout,
+  updateProfile,
 } = require("../controllers/userController");
 
 router.post("/register", upload.single("avatar"), register);
 router.post("/login", login);
 router.get("/logout", logout);
 router.get("/profile", isAuthenticatedUser, profile);
-
+router.put(
+  "/profile/update",
+  isAuthenticatedUser,
+  upload.single("avatar"),
+  updateProfile
+);
 module.exports = router;

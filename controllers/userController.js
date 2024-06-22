@@ -5,7 +5,15 @@ const sendToken = require("../utils/jwtToken");
 const cloudinary = require("cloudinary").v2;
 
 exports.register = async (req, res, next) => {
-  const { firstname, lastname, address, phone, email, password, confirmPassword } = req.body;
+  const {
+    firstname,
+    lastname,
+    address,
+    phone,
+    email,
+    password,
+    confirmPassword,
+  } = req.body;
 
   // Check if password and confirmPassword match
   if (password !== confirmPassword) {
@@ -89,4 +97,50 @@ exports.profile = async (req, res, next) => {
     success: true,
     user,
   });
+};
+
+exports.updateProfile = async (req, res, next) => {
+  const { firstname, lastname, address, phone, email, avatar } = req.body;
+
+  // Prepare updated user data
+  const newUserData = {
+    firstname,
+    lastname,
+    address,
+    phone,
+    email,
+  };
+
+  try {
+    if (avatar) {
+      // Upload image to Cloudinary
+      const cloudinaryFolderOption = {
+        folder: "users", // Replace with your desired folder name
+      };
+
+      const result = await cloudinary.uploader.upload(avatar, cloudinaryFolderOption);
+
+      newUserData.avatar = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
+    // Update user in the database
+    const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
 };
