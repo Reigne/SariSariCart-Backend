@@ -11,12 +11,7 @@ const {
 
 const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
-router.post(
-  "/product/create",
-  upload.array("images"),
-  createProduct,
-  isAuthenticatedUser
-);
+router.post("/product/create", upload.array("images"), createProduct);
 
 router.route("/products").get(allProducts);
 router
