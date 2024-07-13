@@ -88,7 +88,7 @@ exports.login = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   console.log("removed token")
 
-  res.cookie("token", null, {
+  res.cookie("token", "expiredtoken", {
     expires: new Date(Date.now()),
     secure: true,
     httpOnly: false,
