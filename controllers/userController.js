@@ -48,35 +48,46 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return next(new ErrorHandler("Please enter email & password", 400));
+    // Check if email and password are provided
+    if (!email || !password) {
+      return next(new ErrorHandler("Please enter email & password", 400));
+    }
+
+    // Find user by email and include password in the result
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return next(new ErrorHandler("Invalid Email or Password", 401));
+    }
+
+    // Check if the provided password matches the stored password
+    const isPasswordMatched = await user.comparePassword(password);
+
+    if (!isPasswordMatched) {
+      return next(new ErrorHandler("Invalid Email or Password", 401));
+    }
+
+    // If everything is correct, send the token
+    sendToken(user, 200, res);
+
+    console.log(user, "user log");
+
+  } catch (error) {
+    // Pass any caught errors to the error handling middleware
+    next(error);
   }
-
-  const user = await User.findOne({ email }).select("+password");
-
-  console.log(user);
-
-  if (!user) {
-    return next(new ErrorHandler("Invalid Email or Password", 401));
-  }
-
-  const isPasswordMatched = await user.comparePassword(password);
-
-  if (!isPasswordMatched) {
-    return next(new ErrorHandler("Invalid Email or Password", 401));
-  }
-
-  sendToken(user, 200, res);
 };
-
 // exports.logout = async (req, res, next) => {
 //   console.log("controller logout");
 //   sendToken(null, 200, res, true); // Destroy token
 // };
 
 exports.logout = async (req, res, next) => {
+  console.log("removed token")
+
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
