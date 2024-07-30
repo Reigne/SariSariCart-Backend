@@ -85,13 +85,12 @@ exports.login = async (req, res, next) => {
 //   sendToken(null, 200, res, true); // Destroy token
 // };
 
-exports.logout = async (req, res, next) => {
-  console.log("removed token")
-
-  res.cookie("token", "expiredtoken", {
+exports.logout = (req, res, next) => {
+  res.cookie("token", "", {
     expires: new Date(Date.now()),
-    secure: true,
-    httpOnly: false,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   res.status(200).json({
@@ -99,6 +98,8 @@ exports.logout = async (req, res, next) => {
     message: "Logged out",
   });
 };
+
+
 
 exports.profile = async (req, res, next) => {
   const user = await User.findById(req.user.id);
