@@ -9,6 +9,8 @@ const {
   profile,
   logout,
   updateProfile,
+  getAllUsers,
+  updateUserByAdmin,
 } = require("../controllers/userController");
 
 router.post("/register", upload.single("avatar"), register);
@@ -21,4 +23,15 @@ router.put(
   upload.single("avatar"),
   updateProfile
 );
+
+// getAllUsers
+router.get(
+  "/admin/users",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  getAllUsers
+);
+
+router.put("/admin/user/update/:id", isAuthenticatedUser, updateUserByAdmin);
+
 module.exports = router;

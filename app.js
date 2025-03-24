@@ -8,6 +8,7 @@ const categories = require("./routes/category");
 const products = require("./routes/product");
 const users = require("./routes/user");
 const orders = require("./routes/order");
+const dashboards = require("./routes/dashboard");
 
 const allowedOrigins = [`http://localhost:3000`, `${process.env.FRONTEND_URL}`];
 
@@ -26,6 +27,7 @@ app.use("/api/v1", categories);
 app.use("/api/v1", products);
 app.use("/api/v1", users);
 app.use("/api/v1", orders);
+app.use("/api/v1", dashboards);
 
 app.use(errorMiddleware);
 

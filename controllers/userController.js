@@ -4,6 +4,57 @@ const crypto = require("crypto");
 const sendToken = require("../utils/jwtToken");
 const cloudinary = require("cloudinary").v2;
 
+// gets all users
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
+
+exports.updateUserByAdmin = async (req, res, next) => {
+  const { firstname, lastname, email, role, address, phone } = req.body;
+
+  console.log(req.body, "req.body");
+
+  try {
+    // Prepare updated user data
+    const newUserData = {
+      firstname,
+      lastname,
+      email,
+      role,
+      address,
+      phone,
+    };
+
+    // Find user and update
+    const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
+
 exports.register = async (req, res, next) => {
   const {
     firstname,
@@ -74,16 +125,11 @@ exports.login = async (req, res, next) => {
     sendToken(user, 200, res);
 
     console.log(user, "user log");
-
   } catch (error) {
     // Pass any caught errors to the error handling middleware
     next(error);
   }
 };
-// exports.logout = async (req, res, next) => {
-//   console.log("controller logout");
-//   sendToken(null, 200, res, true); // Destroy token
-// };
 
 exports.logout = (req, res, next) => {
   res.cookie("token", "", {
@@ -92,14 +138,12 @@ exports.logout = (req, res, next) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
-  
+
   res.status(200).json({
     success: true,
     message: "Logged out",
   });
 };
-
-
 
 exports.profile = async (req, res, next) => {
   const user = await User.findById(req.user.id);
@@ -131,7 +175,10 @@ exports.updateProfile = async (req, res, next) => {
         folder: "users", // Replace with your desired folder name
       };
 
-      const result = await cloudinary.uploader.upload(avatar, cloudinaryFolderOption);
+      const result = await cloudinary.uploader.upload(
+        avatar,
+        cloudinaryFolderOption
+      );
 
       newUserData.avatar = {
         public_id: result.public_id,

@@ -145,7 +145,7 @@ exports.getMyOrders = async (req, res) => {
 // Update order status
 exports.updateOrderStatus = async (req, res, next) => {
   try {
-    const { status, comment } = req.body;
+    const { status } = req.body;
 
     let order = await OrderModel.findById(req.params.id);
 
@@ -153,19 +153,48 @@ exports.updateOrderStatus = async (req, res, next) => {
       return next(new ErrorHandler("Order not found", 404));
     }
 
+    // Generate appropriate comment based on status
+    let statusComment;
+    switch (status) {
+      case "Pending":
+        statusComment =
+          "Your order has been placed and is awaiting confirmation.";
+        break;
+      case "Confirmed":
+        statusComment = "Your order has been confirmed and is being prepared.";
+        break;
+      case "Shipped":
+        statusComment = "Your order has been shipped from our warehouse.";
+        break;
+      case "Out for Delivery":
+        statusComment = "Your order is out for delivery and will arrive soon.";
+        break;
+      case "Delivered":
+        statusComment =
+          "Your order has been successfully delivered to the shipping address.";
+        order.deliveredAt = Date.now();
+        break;
+      case "Completed":
+        statusComment =
+          "Your order has been completed. Thank you for shopping with us!";
+        break;
+      case "Cancelled":
+        statusComment =
+          "Your order has been cancelled. For any questions, please contact support.";
+        break;
+      default:
+        statusComment = "Order status has been updated.";
+    }
+
     // Add status to history
     order.statusHistory.push({
       status,
-      comment,
+      comment: statusComment,
+      changedAt: Date.now(),
     });
 
     // Update current status
     order.status = status;
-
-    // Set deliveredAt date if status is 'Delivered'
-    if (status === "Delivered") {
-      order.deliveredAt = Date.now();
-    }
 
     await order.save();
 
